@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using TP.ConcurrentProgramming.Presentation.Model;
 using TP.ConcurrentProgramming.Presentation.ViewModel.MVVMLight;
 using ModelIBall = TP.ConcurrentProgramming.Presentation.Model.IBall;
@@ -79,6 +80,24 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     private ModelAbstractApi ModelLayer;
     private bool Disposed = false;
 
+    private RelayCommand updateBallsCommand;
+    private void UpdateBalls()
+    {
+        Start(_ballCount);
+    }
+
+    private int _ballCount;
+
     #endregion private
-  }
+
+    public int BallCount
+    {
+        get => _ballCount;
+        set
+        {
+            _ballCount = value;
+        }
+    }
+    public ICommand UpdateBallsCommand => updateBallsCommand ??= new RelayCommand(UpdateBalls);
+    }
 }

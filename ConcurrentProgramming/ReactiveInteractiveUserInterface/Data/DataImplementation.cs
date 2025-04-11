@@ -19,7 +19,7 @@ namespace TP.ConcurrentProgramming.Data
 
     public DataImplementation()
     {
-      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
+      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(1000/60));
     }
 
     #endregion ctor
@@ -27,7 +27,6 @@ namespace TP.ConcurrentProgramming.Data
     private const double tableWidth = 400.0;
     private const double tableHeight = 400.0;
     private const double ballRadius = 10.0; // smelly, definicja średnicy jest w warstwach wyżej
-    private const double frameTime = 0.05;
 
     #region DataAbstractAPI
 
@@ -42,7 +41,7 @@ namespace TP.ConcurrentProgramming.Data
       {
         Vector startingPosition = new(random.Next(100, (int)tableWidth - 100), random.Next(100, (int)tableHeight - 100));
         double angle = 2 * Math.PI * random.NextDouble();
-        double speed = 20.0;
+        double speed = 2.0;
         double vx = speed * Math.Cos(angle);
         double vy = speed * Math.Sin(angle);
         Vector initialVelocity = new Vector(vx, vy);
@@ -94,7 +93,7 @@ namespace TP.ConcurrentProgramming.Data
     {
         foreach (Ball ball in BallsList)
         {
-            ball.Move(new Vector(ball.Velocity.x * frameTime, ball.Velocity.y * frameTime));
+            ball.Move(new Vector(ball.Velocity.x, ball.Velocity.y));
             Vector position = ball.Position;
             if ((position.x - ballRadius <= 0 && ball.Velocity.x < 0) || (position.x + ballRadius >= tableWidth && ball.Velocity.x > 0))
             {
