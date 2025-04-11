@@ -24,6 +24,11 @@ namespace TP.ConcurrentProgramming.Data
 
     #endregion ctor
 
+    private const double tableWidth = 400.0;
+    private const double tableHeight = 400.0;
+    private const double ballRadius = 10.0; // smelly, definicja średnicy jest w warstwach wyżej
+    private const double frameTime = 0.1;
+
     #region DataAbstractAPI
 
     public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
@@ -35,8 +40,14 @@ namespace TP.ConcurrentProgramming.Data
       Random random = new Random();
       for (int i = 0; i < numberOfBalls; i++)
       {
-        Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-        Ball newBall = new(startingPosition, startingPosition);
+        Vector startingPosition = new(random.Next(100, tableWidth - 100), random.Next(100, tableHeight - 100));
+        double angle = 2 * Math.PI * random.NextDouble();
+        double speed = 5.0;
+        double vx = speed * Math.Cos(angle);
+        double vy = speed * Math.Sin(angle);
+        Vector initialVelocity = new Vector(vx, vy);
+
+        Ball newBall = new(startingPosition, initialVelocity);
         upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
       }
@@ -81,10 +92,60 @@ namespace TP.ConcurrentProgramming.Data
 
     private void Move(object? x)
     {
-      foreach (Ball item in BallsList)
-        item.Move(new Vector((RandomGenerator.NextDouble() - 0.5) * 10, (RandomGenerator.NextDouble() - 0.5) * 10));
-    }
+        foreach (Ball ball in BallsList)
+        {
+            ball.Move(new Vector(ball.Velocity.x * frameTime, ball.Velocity.y * frameTime));
+            Vector position = ball.Position;
+            if ((position.x - ballRadius <= 0 && ball.Velocity.x < 0) || (position.x + ballRadius >= tableWidth && ball.Velocity.x > 0))
+            {
+                ball.Velocity = new Vector(-ball.Velocity.x, ball.Velocity.y);
+            }
+            if ((position.y - ballRadius <= 0 && ball.Velocity.y < 0) || (position.y + ballRadius >= tableHeight && ball.Velocity.y > 0))
+            {
+                ball.Velocity = new Vector(ball.Velocity.x, -ball.Velocity.y);
+            }
+        }
+        for (int i = 0; i < BallsList.Count; i++)
+        {
+            for (int j = i + 1; j < BallsList.Count; j++)
+            {
+                Ball ball1 = BallsList[i];
+                Ball ball2 = BallsList[j];
 
+                Vector delta = new Vector(
+                    ball2.Position.x - ball1.Position.x,
+                    ball2.Position.y - ball1.Position.y);
+
+                double distance = Math.Sqrt(delta.x * delta.x + delta.y * delta.y);
+
+                if (distance < 2 * ballRadius) // kolizja
+                {
+                    // wyznaczenie wektora normalnego (kierunek kolizji)
+                    Vector normal = new Vector(delta.x / distance, delta.y / distance);
+
+                    // obliczenie względnej prędkości
+                    Vector relativeVelocity = new Vector(
+                        ball1.Velocity.x - ball2.Velocity.x,
+                        ball1.Velocity.y - ball2.Velocity.y);
+
+                    // rzut względnej prędkości na kierunek normalny
+                    double dot = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
+
+                    // odbicie tylko gdy kulki poruszają się w kierunku siebie
+                    if (dot < 0)
+                    {
+                        ball1.Velocity = new Vector(
+                                ball1.Velocity.x - dot * normal.x,
+                                ball1.Velocity.y - dot * normal.y);
+
+                        ball2.Velocity = new Vector(
+                                ball2.Velocity.x + dot * normal.x,
+                                ball2.Velocity.y + dot * normal.y);
+                    }
+                }
+            }
+        }
+    }
     #endregion private
 
     #region TestingInfrastructure
