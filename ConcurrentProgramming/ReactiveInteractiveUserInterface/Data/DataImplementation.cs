@@ -27,7 +27,7 @@ namespace TP.ConcurrentProgramming.Data
     private const double tableWidth = 400.0;
     private const double tableHeight = 400.0;
     private const double ballRadius = 10.0; // smelly, definicja średnicy jest w warstwach wyżej
-    private const double frameTime = 0.1;
+    private const double frameTime = 0.05;
 
     #region DataAbstractAPI
 
@@ -40,9 +40,9 @@ namespace TP.ConcurrentProgramming.Data
       Random random = new Random();
       for (int i = 0; i < numberOfBalls; i++)
       {
-        Vector startingPosition = new(random.Next(100, tableWidth - 100), random.Next(100, tableHeight - 100));
+        Vector startingPosition = new(random.Next(100, (int)tableWidth - 100), random.Next(100, (int)tableHeight - 100));
         double angle = 2 * Math.PI * random.NextDouble();
-        double speed = 5.0;
+        double speed = 20.0;
         double vx = speed * Math.Cos(angle);
         double vy = speed * Math.Sin(angle);
         Vector initialVelocity = new Vector(vx, vy);
@@ -122,26 +122,24 @@ namespace TP.ConcurrentProgramming.Data
                 {
                     // wyznaczenie wektora normalnego (kierunek kolizji)
                     Vector normal = new Vector(delta.x / distance, delta.y / distance);
+                    Vector tangent = new Vector(-normal.y, normal.x); // wektor styczny
+                    double v1n = ball1.Velocity.x * normal.x + ball1.Velocity.y * normal.y; // prędkość w kierunku normalnym
+                    double v2n = ball2.Velocity.x * normal.x + ball2.Velocity.y * normal.y;
+                    double v1t = ball1.Velocity.x * tangent.x + ball1.Velocity.y * tangent.y; // prędkość w kierunku stycznym
+                    double v2t = ball2.Velocity.x * tangent.x + ball2.Velocity.y * tangent.y;
+                    // nowa prędkość w kierunku normalnym
+                    // składowe styczne pozostają niezmienione a normalne się wymieniają
+                    double newV1x = (v2n * normal.x) + (v1t * tangent.x);
+                    double newV1y = (v2n * normal.y) + (v1t * tangent.y);
+                    double newV2x = (v1n * normal.x) + (v2t * tangent.x);
+                    double newV2y = (v1n * normal.y) + (v2t * tangent.y);
+                    ball1.Velocity = new Vector(newV1x, newV1y);
+                    ball2.Velocity = new Vector(newV2x, newV2y);
 
-                    // obliczenie względnej prędkości
-                    Vector relativeVelocity = new Vector(
-                        ball1.Velocity.x - ball2.Velocity.x,
-                        ball1.Velocity.y - ball2.Velocity.y);
-
-                    // rzut względnej prędkości na kierunek normalny
-                    double dot = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
-
-                    // odbicie tylko gdy kulki poruszają się w kierunku siebie
-                    if (dot < 0)
-                    {
-                        ball1.Velocity = new Vector(
-                                ball1.Velocity.x - dot * normal.x,
-                                ball1.Velocity.y - dot * normal.y);
-
-                        ball2.Velocity = new Vector(
-                                ball2.Velocity.x + dot * normal.x,
-                                ball2.Velocity.y + dot * normal.y);
-                    }
+                    // jeśli kulki są " w sobie" to przesuwamy je do pozycji styku
+                    double overlap = 2 * ballRadius - distance;
+                    ball1.Move(new Vector(-normal.x * overlap / 2, -normal.y * overlap / 2));
+                    ball2.Move(new Vector(normal.x * overlap / 2, normal.y * overlap / 2));
                 }
             }
         }
