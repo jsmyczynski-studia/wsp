@@ -25,7 +25,7 @@ namespace TP.ConcurrentProgramming.PresentationView
       MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
       double screenWidth = SystemParameters.PrimaryScreenWidth;
       double screenHeight = SystemParameters.PrimaryScreenHeight;
-      viewModel.Start(random.Next(5, 10));
+      // viewModel.Start(random.Next(5, 10));
     }
 
     /// <summary>
@@ -37,12 +37,6 @@ namespace TP.ConcurrentProgramming.PresentationView
       if (DataContext is MainWindowViewModel viewModel)
         viewModel.Dispose();
       base.OnClosed(e);
-    }
-
-
-    private void Border_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-
     }
   }
 }
