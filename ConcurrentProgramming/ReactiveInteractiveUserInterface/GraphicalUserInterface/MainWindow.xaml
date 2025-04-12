@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:TP.ConcurrentProgramming.Presentation.ViewModel;assembly=TP.ConcurrentProgramming.PresentationViewModel"
         mc:Ignorable="d"
-        Title="Presentation layer targeting reactive behaviour" Height="600" Width="600">
+        Title="Presentation layer targeting reactive behaviour" Height="600" Width="500">
     <Window.DataContext>
         <vm:MainWindowViewModel />
     </Window.DataContext>
@@ -21,12 +21,12 @@
             <Button Content="Generuj kulki" Command="{Binding UpdateBallsCommand}" Width="150" />
         </StackPanel>
 
-        <Border BorderThickness="4" BorderBrush="Maroon" Background="PapayaWhip" Grid.Row="1">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Viewbox Stretch="Uniform" Grid.Row="1">
+            <Border BorderThickness="4" BorderBrush="Maroon" Background="PapayaWhip" Width="400" Height="400">
                 <ItemsControl ItemsSource="{Binding Balls}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <Canvas />
+                            <Canvas Margin="-20, -20, 0, 0" Width="400" Height="400"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
@@ -41,7 +41,7 @@
                         </Style>
                     </ItemsControl.ItemContainerStyle>
                 </ItemsControl>
-            </ScrollViewer>
-        </Border>
+            </Border>
+        </Viewbox>
     </Grid>
 </Window>

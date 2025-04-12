@@ -38,5 +38,11 @@ namespace TP.ConcurrentProgramming.PresentationView
         viewModel.Dispose();
       base.OnClosed(e);
     }
+
+
+    private void Border_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+
+    }
   }
 }

@@ -83,6 +83,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     private RelayCommand updateBallsCommand;
     private void UpdateBalls()
     {
+        Dispose();
         Start(_ballCount);
     }
 
