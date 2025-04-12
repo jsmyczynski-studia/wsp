@@ -37,8 +37,8 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(MainWindowViewModel));
+      Balls.Clear();
       ModelLayer.Start(numberOfBalls);
-      // Observer.Dispose();
     }
 
     public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
@@ -89,7 +89,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     #endregion private
 
-    public int BallCount { get; set; }
+    public int BallCount { get; set; } = 10;
     public ICommand UpdateBallsCommand => updateBallsCommand ??= new RelayCommand(UpdateBalls);
 
     }

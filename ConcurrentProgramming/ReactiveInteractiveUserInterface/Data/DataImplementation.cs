@@ -36,19 +36,23 @@ namespace TP.ConcurrentProgramming.Data
         throw new ObjectDisposedException(nameof(DataImplementation));
       if (upperLayerHandler == null)
         throw new ArgumentNullException(nameof(upperLayerHandler));
-      Random random = new Random();
-      for (int i = 0; i < numberOfBalls; i++)
+      lock (BallsList)
       {
-        Vector startingPosition = new(random.Next(100, (int)tableWidth - 100), random.Next(100, (int)tableHeight - 100));
-        double angle = 2 * Math.PI * random.NextDouble();
-        double speed = 2.0;
-        double vx = speed * Math.Cos(angle);
-        double vy = speed * Math.Sin(angle);
-        Vector initialVelocity = new Vector(vx, vy);
+        BallsList.Clear();
+        Random random = new Random();
+        for (int i = 0; i < numberOfBalls; i++)
+        {
+            Vector startingPosition = new(random.Next(100, (int)tableWidth - 100), random.Next(100, (int)tableHeight - 100));
+            double angle = 2 * Math.PI * random.NextDouble();
+            double speed = 2.0;
+            double vx = speed * Math.Cos(angle);
+            double vy = speed * Math.Sin(angle);
+            Vector initialVelocity = new Vector(vx, vy);
 
-        Ball newBall = new(startingPosition, initialVelocity);
-        upperLayerHandler(startingPosition, newBall);
-        BallsList.Add(newBall);
+            Ball newBall = new(startingPosition, initialVelocity);
+            upperLayerHandler(startingPosition, newBall);
+            BallsList.Add(newBall);
+        }
       }
     }
 
@@ -91,6 +95,7 @@ namespace TP.ConcurrentProgramming.Data
 
     private void Move(object? x)
     {
+      lock (BallsList) {
         foreach (Ball ball in BallsList)
         {
             ball.Move(new Vector(ball.Velocity.x, ball.Velocity.y));
@@ -142,6 +147,7 @@ namespace TP.ConcurrentProgramming.Data
                 }
             }
         }
+      }
     }
     #endregion private
 
