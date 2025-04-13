@@ -26,7 +26,7 @@ namespace TP.ConcurrentProgramming.Data
 
     private const double tableWidth = 400.0;
     private const double tableHeight = 400.0;
-    private const double ballRadius = 10.0; // smelly, definicja średnicy jest w warstwach wyżej
+    private const double ballRadius = 10.0;
 
     #region DataAbstractAPI
 

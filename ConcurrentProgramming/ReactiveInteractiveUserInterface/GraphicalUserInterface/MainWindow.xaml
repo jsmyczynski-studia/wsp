@@ -22,7 +22,7 @@
         </StackPanel>
 
         <Viewbox Stretch="Uniform" Grid.Row="1">
-            <Border BorderThickness="4" BorderBrush="Maroon" Background="PapayaWhip" Width="400" Height="400">
+            <Border BorderThickness="4" BorderBrush="Maroon" Background="PapayaWhip" Width="408" Height="408">
                 <ItemsControl ItemsSource="{Binding Balls}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
