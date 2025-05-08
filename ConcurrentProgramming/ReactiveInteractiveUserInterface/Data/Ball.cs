@@ -18,6 +18,7 @@ namespace TP.ConcurrentProgramming.Data
     {
       _Position = initialPosition;
       Velocity = initialVelocity;
+      _mass = 1.0;
     }
 
     #endregion ctor
@@ -32,6 +33,7 @@ namespace TP.ConcurrentProgramming.Data
 
     #region private
 
+    private double _mass;
     private Thread? _thread;
     private Vector _Position;
 
@@ -48,6 +50,7 @@ namespace TP.ConcurrentProgramming.Data
 
     #endregion private
 
+    public double mass => _mass;
     public Vector Position => _Position;
 
     public void StartThread(Action<Ball> moveAction)

@@ -35,16 +35,16 @@ namespace TP.ConcurrentProgramming.Data
         Random random = new Random();
         for (int i = 0; i < numberOfBalls; i++)
         {
-            Vector startingPosition = new(random.Next(100, (int)tableWidth - 100), random.Next(100, (int)tableHeight - 100));
-            double angle = 2 * Math.PI * random.NextDouble();
-            double speed = 1.5;
-            double vx = speed * Math.Cos(angle);
-            double vy = speed * Math.Sin(angle);
-            Vector initialVelocity = new Vector(vx, vy);
+          Vector startingPosition = new(random.Next(100, (int)tableWidth - 100), random.Next(100, (int)tableHeight - 100));
+          double angle = 2 * Math.PI * random.NextDouble();
+          double speed = 1.5;
+          double vx = speed * Math.Cos(angle);
+          double vy = speed * Math.Sin(angle);
+          Vector initialVelocity = new Vector(vx, vy);
 
-            Ball newBall = new(startingPosition, initialVelocity);
-            upperLayerHandler(startingPosition, newBall);
-            BallsList.Add(newBall);
+          Ball newBall = new(startingPosition, initialVelocity);
+          upperLayerHandler(startingPosition, newBall);
+          BallsList.Add(newBall);
         }
 				foreach (Ball ball in BallsList)
 				{
@@ -133,12 +133,16 @@ namespace TP.ConcurrentProgramming.Data
             double v2n = otherBall.Velocity.x * normal.x + otherBall.Velocity.y * normal.y;
             double v1t = ball.Velocity.x * tangent.x + ball.Velocity.y * tangent.y; // prędkość w kierunku stycznym
             double v2t = otherBall.Velocity.x * tangent.x + otherBall.Velocity.y * tangent.y;
-            // nowa prędkość w kierunku normalnym
-            // składowe styczne pozostają niezmienione a normalne się wymieniają
-            double newV1x = (v2n * normal.x) + (v1t * tangent.x);
-            double newV1y = (v2n * normal.y) + (v1t * tangent.y);
-            double newV2x = (v1n * normal.x) + (v2t * tangent.x);
-            double newV2y = (v1n * normal.y) + (v2t * tangent.y);
+						// uwzglednianie mas
+						double m1 = ball.mass;
+            double m2 = otherBall.mass;
+            double newV1n = (v1n * (m1 - m2) + 2 * m2 * v2n) / (m1 + m2);
+						double newV2n = (v2n * (m2 - m1) + 2 * m1 * v1n) / (m1 + m2);
+						// nowa prędkość w kierunku normalnym
+						double newV1x = (newV1n * normal.x) + (v1t * tangent.x);
+            double newV1y = (newV1n * normal.y) + (v1t * tangent.y);
+            double newV2x = (newV2n * normal.x) + (v2t * tangent.x);
+            double newV2y = (newV2n * normal.y) + (v2t * tangent.y);
             ball.Velocity = new Vector(newV1x, newV1y);
             otherBall.Velocity = new Vector(newV2x, newV2y);
 
