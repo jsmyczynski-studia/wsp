@@ -32,6 +32,7 @@ namespace TP.ConcurrentProgramming.Data
 
     #region private
 
+    private Thread? _thread;
     private Vector _Position;
 
     private void RaiseNewPositionChangeNotification()
@@ -49,5 +50,34 @@ namespace TP.ConcurrentProgramming.Data
 
     public Vector Position => _Position;
 
+    public void StartThread(Action<Ball> moveAction)
+    {
+      _thread = new Thread(ThreadFunction);
+      _thread.Start(moveAction);
     }
+
+    public void StopThread()
+    {
+      _thread.Interrupt();
+      _thread.Join();
+      _thread = null;
+    }
+
+    public void ThreadFunction(object moveActionObject)
+    {
+      var moveAction = moveActionObject as Action<Ball>;
+      try
+      { 
+        while(true)
+        {
+          Thread.Sleep(10);
+          moveAction(this);
+        }
+      }
+      catch (ThreadInterruptedException)
+      {
+        //konczymy watek
+      }
+    }
+  }
 }
