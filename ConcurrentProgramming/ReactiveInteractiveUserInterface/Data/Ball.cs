@@ -55,20 +55,32 @@ namespace TP.ConcurrentProgramming.Data
 
     public void StartThread(Action<Ball> moveAction)
     {
+      if (_thread != null)
+      {
+        throw new InvalidOperationException("Thread already started");
+      }
       _thread = new Thread(ThreadFunction);
       _thread.Start(moveAction);
     }
 
     public void StopThread()
     {
-      _thread.Interrupt();
+    if (_thread == null)
+    {
+      throw new InvalidOperationException("Thread not started");
+    }
+    _thread.Interrupt();
       _thread.Join();
       _thread = null;
     }
 
-    public void ThreadFunction(object moveActionObject)
+    public void ThreadFunction(object? moveActionObject)
     {
       var moveAction = moveActionObject as Action<Ball>;
+      if (moveAction == null)
+      {
+        throw new ArgumentNullException(nameof(moveAction));
+      }
       try
       { 
         while(true)
