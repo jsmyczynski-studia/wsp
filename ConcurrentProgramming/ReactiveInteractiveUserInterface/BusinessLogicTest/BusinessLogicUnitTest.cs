@@ -8,6 +8,7 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.Numerics;
 using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic.Test
@@ -64,7 +65,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
     private class DataLayerConstructorFixcure : Data.DataAbstractAPI
     {
-      public override void Dispose()
+			public override void ChangePos(Data.IBall ball, IVector delta)
+			{	}
+
+      public override IVector CreateVector(double x, double y)
+      {
+				throw new NotImplementedException();
+			}
+			
+			public override void Dispose()
       { }
 
       public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
@@ -77,7 +86,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     {
       internal bool Disposed = false;
 
-      public override void Dispose()
+			public override void ChangePos(Data.IBall ball, IVector delta)
+			{ }
+
+			public override IVector CreateVector(double x, double y)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override void Dispose()
       {
         Disposed = true;
       }
@@ -103,7 +120,17 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
       }
 
-      private record DataVectorFixture : Data.IVector
+			public override IVector CreateVector(double x, double y)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override void ChangePos(Data.IBall ball, IVector delta)
+			{
+				throw new NotImplementedException();
+			}
+
+			private record DataVectorFixture : Data.IVector
       {
         public double x { get; init; }
         public double y { get; init; }
@@ -113,7 +140,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       {
         public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public event EventHandler<IVector>? NewPositionNotification = null;
+				public double mass => throw new NotImplementedException();
+
+				public event EventHandler<IVector>? NewPositionNotification = null;
       }
     }
 
