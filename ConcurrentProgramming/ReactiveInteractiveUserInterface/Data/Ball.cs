@@ -51,7 +51,10 @@ namespace TP.ConcurrentProgramming.Data
     #endregion private
 
     public double mass => _mass;
-    public Vector Position => _Position;
+    internal void setPosition (Vector newPos)
+    {
+        _Position = newPos;
+    }
 
     public void StartThread(Action<Ball> moveAction)
     {

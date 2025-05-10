@@ -67,16 +67,23 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     private void OnDataBallMoved(object? sender, Data.IVector pos)
     {
         var ball = (Data.IBall)sender!;
+        var lastPos = lastPositions[ball];
         lock (dataBalls)
         {
             lastPositions[ball] = pos;
             if ((pos.x - ballRadius <= 0 && ball.Velocity.x < 0) || (pos.x + ballRadius >= tableWidth && ball.Velocity.x > 0))
             {
                 ball.Velocity = layerBellow.CreateVector(-ball.Velocity.x, ball.Velocity.y);
+                layerBellow.ChangePos(ball, lastPos);
+                lastPositions[ball] = lastPos;
+                return;
             }
             if ((pos.y - ballRadius <= 0 && ball.Velocity.y < 0) || (pos.y + ballRadius >= tableHeight && ball.Velocity.y > 0))
             {
                 ball.Velocity = layerBellow.CreateVector(ball.Velocity.x, -ball.Velocity.y);
+                layerBellow.ChangePos(ball, lastPos);
+                lastPositions[ball] = lastPos;
+                return;
             }
             foreach (var otherBall in dataBalls)
             {
@@ -84,16 +91,18 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 {
                     continue;
                 }
-                var delta = layerBellow.CreateVector(
+                var deltaDist = layerBellow.CreateVector(
                     lastPositions[otherBall].x - pos.x,
                     lastPositions[otherBall].y - pos.y);
-
-                double distance = Math.Sqrt(delta.x * delta.x + delta.y * delta.y);
-
-                if (distance < 2 * ballRadius) // kolizja
+                double distance1 = Math.Sqrt(deltaDist.x * deltaDist.x + deltaDist.y * deltaDist.y);
+                if (distance1 < 2 * ballRadius) // kolizja
                 {
+                    var deltaNorm = layerBellow.CreateVector(
+                        lastPositions[otherBall].x - lastPos.x,
+                        lastPositions[otherBall].y - lastPos.y);
+                    double distance = Math.Sqrt(deltaNorm.x * deltaNorm.x + deltaNorm.y * deltaNorm.y);
                     // wyznaczenie wektora normalnego (kierunek kolizji)
-                    IVector normal = layerBellow.CreateVector(delta.x / distance, delta.y / distance);
+                    IVector normal = layerBellow.CreateVector(deltaNorm.x / distance, deltaNorm.y / distance);
                     IVector tangent = layerBellow.CreateVector(-normal.y, normal.x); // wektor styczny
                     double v1n = ball.Velocity.x * normal.x + ball.Velocity.y * normal.y; // prędkość w kierunku normalnym
                     double v2n = otherBall.Velocity.x * normal.x + otherBall.Velocity.y * normal.y;
@@ -111,14 +120,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                     double newV2y = (newV2n * normal.y) + (v2t * tangent.y);
                     ball.Velocity = layerBellow.CreateVector(newV1x, newV1y);
                     otherBall.Velocity = layerBellow.CreateVector(newV2x, newV2y);
-
-                    // jeśli kulki są " w sobie" to przesuwamy je do pozycji styku
-                    double overlap = 2 * ballRadius - distance;
-                    if (overlap > 0)
-                    {
-                        layerBellow.ChangePos(ball, layerBellow.CreateVector(-normal.x * overlap / 2, -normal.y * overlap / 2));
-                        layerBellow.ChangePos(otherBall, layerBellow.CreateVector(normal.x * overlap / 2, normal.y * overlap / 2));
-                    }
+                    layerBellow.ChangePos(ball, lastPos);
+                    lastPositions[ball] = lastPos;
+                    return;
                 }
             }
         }

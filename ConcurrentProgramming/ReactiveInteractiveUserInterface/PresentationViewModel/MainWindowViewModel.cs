@@ -84,7 +84,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     private void UpdateBalls()
     {
-        Start(BallCount);
+       if (BallCount < 325) { Start(BallCount); }
     }
 
     #endregion private

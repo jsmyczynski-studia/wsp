@@ -10,23 +10,39 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace TP.ConcurrentProgramming.Data
 {
   internal class DataImplementation : DataAbstractAPI
   {
+    internal DataImplementation()
+    {
+        double pad = (tableWidth - gridSize * 2 * ballRadius) / (gridSize + 1);
+        for (int i = 0; i < gridSize; i++)
+        {
+            for (int j = 0; j < gridSize; j++)
+            {
+               double x = ballRadius + pad + i * (2*ballRadius + pad);
+               double y = ballRadius + pad + j * (2*ballRadius + pad);
+               StartingPositions[i * gridSize + j] = new Vector(x, y);
+            }
+        }
+        StartingPositions = StartingPositions
+                    .OrderBy(_ => random.Next())
+                    .ToArray();
+    }
 
     #region DataAbstractAPI
     public override IVector CreateVector(double x, double y)
     {
         return new Vector(x, y);
     }
-    public override void ChangePos(IBall ib, IVector d)
+    public override void ChangePos(IBall ib, IVector v)
     {
         Ball b = (Ball)ib;
-        Vector delta = new Vector(d.x, d.y);
-        b.Move(delta);
+        b.setPosition((Vector)v);
     }
     public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
     {
@@ -41,10 +57,9 @@ namespace TP.ConcurrentProgramming.Data
           ball.StopThread();
 		}
 		BallsList.Clear();
-        Random random = new Random();
         for (int i = 0; i < numberOfBalls; i++)
         {
-          Vector startingPosition = new(random.Next(100, (int)tableWidth - 100), random.Next(100, (int)tableHeight - 100));
+          Vector startingPosition = StartingPositions[i];
           double angle = 2 * Math.PI * random.NextDouble();
           double speed = 1.0;
           double vx = speed * Math.Cos(angle);
@@ -101,8 +116,12 @@ namespace TP.ConcurrentProgramming.Data
     //private bool disposedValue;
     private bool Disposed = false;
     private List<Ball> BallsList = [];
+    private const int gridSize = 18;
+    private Vector[] StartingPositions = new Vector[gridSize*gridSize];
     private const double tableWidth = 400.0;
     private const double tableHeight = 400.0;
+    private const double ballRadius = 10.0;
+    private Random random = new Random();
     private void Move(Ball ball)
     {
       lock (BallsList)
