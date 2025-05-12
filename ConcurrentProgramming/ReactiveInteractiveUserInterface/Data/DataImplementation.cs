@@ -126,7 +126,7 @@ namespace TP.ConcurrentProgramming.Data
     {
       lock (BallsList)
       {
-        ball.Move(new Vector(ball.Velocity.x, ball.Velocity.y));  
+        ball.Move(ball.Velocity);  
       }
     }
     #endregion private

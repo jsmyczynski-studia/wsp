@@ -42,7 +42,7 @@ namespace TP.ConcurrentProgramming.Data
       NewPositionNotification?.Invoke(this, _Position);
     }
 
-    internal void Move(Vector delta)
+    internal void Move(IVector delta)
     {
       _Position = new Vector(_Position.x + delta.x, _Position.y + delta.y);
       RaiseNewPositionChangeNotification();
