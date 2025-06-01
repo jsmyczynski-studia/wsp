@@ -12,9 +12,19 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Timers;
+using System.Xml.Serialization;
 
 namespace TP.ConcurrentProgramming.Data
 {
+  [Serializable]
+  public class BallState
+  {
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double Vx { get; set; }
+    public double Vy { get; set; }
+  }
   internal class DataImplementation : DataAbstractAPI
   {
     internal DataImplementation()
@@ -32,6 +42,10 @@ namespace TP.ConcurrentProgramming.Data
         StartingPositions = StartingPositions
                     .OrderBy(_ => random.Next())
                     .ToArray();
+        _saveTimer = new System.Timers.Timer(interval: 60000); // minuta
+        _saveTimer.AutoReset = true;
+        _saveTimer.Elapsed += OnSaveTimerElapsed;
+        _saveTimer.Start();
     }
 
     #region DataAbstractAPI
@@ -75,6 +89,7 @@ namespace TP.ConcurrentProgramming.Data
 		  ball.StartThread(this.Move);
 		}
       }
+      OnSaveTimerElapsed(null, null); // zapis na starcie
     }
 
     #endregion DataAbstractAPI
@@ -83,23 +98,25 @@ namespace TP.ConcurrentProgramming.Data
 
     protected virtual void Dispose(bool disposing)
     {
-      if (!Disposed)
-      {
-        if (disposing)
+        if (!Disposed)
         {
-          lock(BallsList)
-          {
-						foreach (Ball ball in BallsList)
-						{
-							ball.StopThread();
-						}
-						BallsList.Clear();
-					}
+            if (disposing)
+            {
+                _saveTimer.Stop();
+                _saveTimer.Dispose();
+                lock (BallsList)
+                {
+                    foreach (Ball ball in BallsList)
+                    {
+                        ball.StopThread();
+                    }
+                    BallsList.Clear();
+                }
+            }
+            Disposed = true;
         }
-        Disposed = true;
-      }
-      else
-        throw new ObjectDisposedException(nameof(DataImplementation));
+        else
+        { throw new ObjectDisposedException(nameof(DataImplementation)); }
     }
 
     public override void Dispose()
@@ -113,6 +130,8 @@ namespace TP.ConcurrentProgramming.Data
 
     #region private
 
+    private readonly System.Timers.Timer _saveTimer;
+    private string _outputFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "balls_state.xml");
     //private bool disposedValue;
     private bool Disposed = false;
     private List<Ball> BallsList = [];
@@ -128,6 +147,37 @@ namespace TP.ConcurrentProgramming.Data
       {
         ball.Move(ball.Velocity);  
       }
+    }
+    private void OnSaveTimerElapsed(object? sender, ElapsedEventArgs? e)
+    {
+        List<BallState> snapshot = new List<BallState>();
+        lock (BallsList)
+        {
+            foreach (var ball in BallsList)
+            {
+                Vector pos = ball.Position;
+                Vector vel = (Vector)ball.Velocity;
+                snapshot.Add(new BallState
+                {
+                    X = pos.x,
+                    Y = pos.y,
+                    Vx = vel.x,
+                    Vy = vel.y
+                });
+            }
+        }
+        try
+        {
+            using (FileStream fs = new(_outputFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                XmlSerializer serializer = new(typeof(List<BallState>));
+                serializer.Serialize(fs, snapshot);
+            }
+        }
+        catch (IOException ioEx)
+        {
+            Debug.WriteLine($"Failed to serialize balls: {ioEx.Message}");
+        }
     }
     #endregion private
 
